@@ -5,6 +5,8 @@ from werkzeug.wrappers import response
 import db_config as database
 from bson.json_util import ObjectId
 
+from res.measurements import Measurements
+
 app = Flask(__name__)
 api=Api(app)
 CORS(app)
@@ -26,9 +28,11 @@ def insert():
         ).inserted_id)
 
     if response:
-        return jsonify({"response":response})
+        return jsonify({"response":response, "arduinoId":arduinoId})
     else:
         return jsonify({'message':'Error insert'})
+
+api.add_resource(Measurements, '/del/all/')
 
 if __name__ == '__main__':
     app.run(load_dotenv=True)
