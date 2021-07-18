@@ -11,26 +11,65 @@ app = Flask(__name__)
 api=Api(app)
 CORS(app)
 
+""" In this endpoint the arduino object is created in the database
+    if it does not exists """
+@app.route("/arduinoPost/", methods=['GET'])
+def insertArduino():
+
+    arduinoId = request.args.get("arduinoId")
+    flag = Measurements.check_if_arduino_exists(arduinoId)
+    print(flag)
+    if(flag):
+        temp = request.args.get("temp")
+        food = request.args.get("food")
+        airQuality = request.args.get("airQuality")
+        date = request.args.get("date")
+
+        response = str(database.db.db_iot.insert_one(
+                {
+                    'arduinoId':arduinoId,
+                    'airQuality':airQuality,
+                    'food':food,
+                    'temp':temp,
+                    'lastUpdate':date,
+                    'measurements':[]
+                }
+            ).inserted_id)
+
+    if flag:
+        return jsonify({"response":response, "arduinoId":arduinoId, "date":date})
+    else:
+        return jsonify({'message':'Arduino already exists'})
+
+""" In this endpoint the arduino's data is updated
+    and there is created a new object in the
+    measurements array """
 @app.route("/option/", methods=['GET'])
 def insert():
     arduinoId = request.args.get("arduinoId")
     temp = request.args.get("temp")
     food = request.args.get("food")
     airQuality = request.args.get("airQuality")
+    date = request.args.get("date")
 
-    response = str(database.db.db_iot.insert_one(
-            {
-                'arduinoId':arduinoId,
+    database.db.db_iot.update_one({'arduinoId':arduinoId},
+        {
+            '$push':{
+            'measurements':{
                 'airQuality':airQuality,
                 'food':food,
                 'temp':temp,
+                'date':date,
+            }},
+            '$set':{
+            'airQuality':airQuality,
+            'food':food,
+            'temp':temp,
+            'lastUpdate':date,
             }
-        ).inserted_id)
+        })
 
-    if response:
-        return jsonify({"response":response, "arduinoId":arduinoId})
-    else:
-        return jsonify({'message':'Error insert'})
+    return jsonify({"arduinoId":arduinoId,"temp":temp,"food":food,"airQuality":airQuality, "date":date})
 
 api.add_resource(Measurements, '/del/all/')
 
