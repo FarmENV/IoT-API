@@ -20,17 +20,13 @@ def insertArduino():
     flag = Measurements.check_if_arduino_exists(arduinoId)
     print(flag)
     if(flag):
-        temp = request.args.get("temp")
-        food = request.args.get("food")
-        airQuality = request.args.get("airQuality")
         date = request.args.get("date")
-
         response = str(database.db.db_iot.insert_one(
                 {
                     'arduinoId':arduinoId,
-                    'airQuality':airQuality,
-                    'food':food,
-                    'temp':temp,
+                    'airQuality':0,
+                    'food':0,
+                    'temp':0,
                     'lastUpdate':date,
                     'measurements':[]
                 }
