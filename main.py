@@ -6,6 +6,7 @@ import db_config as database
 from bson.json_util import ObjectId
 
 from res.measurements import Measurements
+from res.sensorsKit import SensorsKit
 
 app = Flask(__name__)
 api=Api(app)
@@ -67,7 +68,8 @@ def insert():
 
     return jsonify({"arduinoId":arduinoId,"temp":temp,"food":food,"airQuality":airQuality, "date":date})
 
-api.add_resource(Measurements, '/del/all/')
+api.add_resource(Measurements, '/del/<string:data>/')
+api.add_resource(SensorsKit, '/add/', '/<string:by>:<string:data>/')
 
 if __name__ == '__main__':
     app.run(load_dotenv=True)
