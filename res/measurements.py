@@ -6,6 +6,11 @@ import db_config as database
 
 class Measurements(Resource):
 
+    def get(self,data):
+        response = self.abort_if_not_exist(data)
+        response['_id'] = str(response['_id'])
+        return jsonify(response)
+
     ''' Delete all data from an arduino object '''
     def delete(self, data):
         response = self.abort_if_not_exist(data)

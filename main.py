@@ -1,3 +1,4 @@
+from res.allSensors import Sensors
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_restful import Api
@@ -25,6 +26,7 @@ def insertArduino():
         response = str(database.db.db_iot.insert_one(
                 {
                     'arduinoId':arduinoId,
+                    'humidity':0,
                     'airQuality':0,
                     'food':0,
                     'temp':0,
@@ -44,6 +46,7 @@ def insertArduino():
 @app.route("/option/", methods=['GET'])
 def insert():
     arduinoId = request.args.get("arduinoId")
+    humidity = request.args.get("humidity")
     temp = request.args.get("temp")
     food = request.args.get("food")
     airQuality = request.args.get("airQuality")
@@ -53,12 +56,14 @@ def insert():
         {
             '$push':{
             'measurements':{
+                'humidity':humidity,
                 'airQuality':airQuality,
                 'food':food,
                 'temp':temp,
                 'date':date,
             }},
             '$set':{
+            'humidity':humidity,
             'airQuality':airQuality,
             'food':food,
             'temp':temp,
@@ -66,10 +71,11 @@ def insert():
             }
         })
 
-    return jsonify({"arduinoId":arduinoId,"temp":temp,"food":food,"airQuality":airQuality, "date":date})
+    return jsonify({"arduinoId":arduinoId,"humidity":humidity, "temp":temp,"food":food,"airQuality":airQuality, "date":date})
 
-api.add_resource(Measurements, '/del/<string:data>/')
+api.add_resource(Measurements, '/system/<string:data>','/del/<string:data>/')
 api.add_resource(SensorsKit, '/add/', '/<string:by>:<string:data>/')
+api.add_resource(Sensors, '/all/')
 
 if __name__ == '__main__':
     app.run(load_dotenv=True)
